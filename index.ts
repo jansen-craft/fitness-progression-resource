@@ -1,25 +1,33 @@
 import { UserDatabase, User } from "./services/database";
 
-// const dummies: User[] = [
-//     {user_id: -1, first_name: "John", last_name: "Doe"},
-//     {user_id: -1, first_name: "Jane", last_name: "Doe"},
-//     {user_id: -1, first_name: "Tin", last_name: "Vuong"},
-// ]
-// const insertUser = db.prepare("INSERT INTO users (first_name, last_name) VALUES ($firstName, $lastName);");
-// const insertUsers = db.transaction(dummies => {
-//   for (const user of dummies) insertUser.run({$firstName: user.firstName, $lastName: user.lastName});
-// });
-// insertUsers.immediate(dummies);
 
-function get(req: Request): Response{
+async function get(req: Request): Promise<Response>{
+    const url = new URL(req.url);
+    if(url.pathname === "/users"){
+        return new Response(JSON.stringify(await userDB.getUsers()));
+    } else if (url.pathname.includes("/user/")){
+        const remaining: string = url.pathname.substring(6);
+        return new Response(JSON.stringify(await userDB.getUser(Number(remaining))));
+    } else {
+        return new Response(`No route ${url.pathname} exists for GET`);
+    }
+}
+
+function post(req: Request): Response{
     const url = new URL(req.url);
     switch (url.pathname) {
-        case "/users":
-            return new Response(JSON.stringify(userDB.getUsers()));
         case "/user":
-            return new Response(JSON.stringify(userDB.getUser(Number(url.searchParams.get("id")))));
+            // first and last name
+            const str = await Bun.readableStreamToText(req.body!);
+            if(req.body url.searchParams.get("first_name") && url.searchParams.get("last_name")){
+                const first_name = url.searchParams.get("first_name")!;
+                const last_name = url.searchParams.get("last_name")!;
+                userDB.postUser(first_name, last_name);
+            } else {
+                return new Response("Must use valid id");
+            }
         default:
-            return new Response(`No route ${url.pathname} exists`);
+            return new Response(`No route ${url.pathname} exists for POST`);
     } 
 }
 
@@ -32,6 +40,8 @@ const server = Bun.serve({
         switch (req.method) {
             case "GET":
                 return get(req);
+            case "POST":
+                return post(req);
             default:
                 return new Response("How did this even happen?")
         }
