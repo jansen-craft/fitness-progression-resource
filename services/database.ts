@@ -1,4 +1,14 @@
-import Database from "bun:sqlite";
+import { ConnectionOptions, createConnection } from "mysql2/promise";
+
+let co: ConnectionOptions = {
+    host: 'xxxxxxxx',
+    database: 'fitness',
+    port: 3306,
+    user: "admin",
+    password: 'xxxxxxxx',
+  };
+
+const connection = await createConnection(co);
 
 export interface User {
     user_id: Number,
@@ -7,24 +17,18 @@ export interface User {
 }
 
 export class UserDatabase {
-    db: Database;
-
-    constructor (){
-        this.db = new Database("db.db");
-
-        this.db.run(
-            "CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, first_name TEXT NOT NULL, last_name TEXT NOT NULL)"
-        )
+    async getUsers(): Promise<User[]>{
+        let [response]: Promise<User[]> = await connection.query("SELECT * FROM users");
+        return response
     }
 
-    getUsers(): User[]{
-        return this.db.query("SELECT * FROM users").all() as User[];
+    async getUser(id: Number): Promise<User>{
+        let [response]: Promise<User> = await connection.query(`SELECT * FROM users WHERE user_id=${id}`);
+        return response
     }
 
-    getUser(id: Number): User{
-        return this.db.query("SELECT * FROM users WHERE user_id=$id").get({
-            $id: id.toString()
-        }) as User;
+    postUser(fn: string, ln: string): void{
+        connection.query(`INSERT INTO users (first_name, last_name) VALUES (${fn}, ${ln})`);
     }
 
     deleteUser(id: Number): void{
