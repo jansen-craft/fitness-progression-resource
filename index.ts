@@ -18,8 +18,7 @@ function post(req: Request): Response{
     switch (url.pathname) {
         case "/user":
             // first and last name
-            const str = await Bun.readableStreamToText(req.body!);
-            if(req.body url.searchParams.get("first_name") && url.searchParams.get("last_name")){
+            if(url.searchParams.get("first_name") && url.searchParams.get("last_name")){
                 const first_name = url.searchParams.get("first_name")!;
                 const last_name = url.searchParams.get("last_name")!;
                 userDB.postUser(first_name, last_name);
