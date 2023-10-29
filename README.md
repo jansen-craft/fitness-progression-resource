@@ -20,6 +20,8 @@ To install dependencies:
 bun install
 ```
 
+Note: In order to get this to run, you'll need to setup a valid connection to a database, or migrate back to an sqlite local database.
+
 To run:
 
 ```bash
